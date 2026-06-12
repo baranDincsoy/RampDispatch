@@ -16,9 +16,4 @@ interface FuelerDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(fuelers: List<FuelerEntity>)
 
-    @Query("UPDATE fuel_orders SET fuelerId = :fuelerId, status = 'ASSIGNED' WHERE id = :orderId")
-    suspend fun assignFueler(orderId: String, fuelerId: String)
-
-    @Query("SELECT id FROM fuel_orders")
-    suspend fun getAllIds(): List<String>
 }
