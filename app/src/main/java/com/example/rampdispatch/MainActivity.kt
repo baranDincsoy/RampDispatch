@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
+import com.example.rampdispatch.navigation.RampDispatchNavGraph
 import com.example.rampdispatch.ui.board.DispatchBoardScreen
 import com.example.rampdispatch.ui.board.DispatchBoardViewModel
 import com.example.rampdispatch.ui.theme.RampDispatchTheme
@@ -22,9 +24,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             RampDispatchTheme {
-                val viewModel: DispatchBoardViewModel =
-                    viewModel(factory = DispatchBoardViewModel.Factory)
-                DispatchBoardScreen(viewModel = viewModel)
+                val navController = rememberNavController()
+                RampDispatchNavGraph(navController = navController)
             }
         }
     }
