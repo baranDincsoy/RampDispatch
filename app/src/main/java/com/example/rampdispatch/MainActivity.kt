@@ -11,6 +11,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.rampdispatch.ui.board.DispatchBoardScreen
+import com.example.rampdispatch.ui.board.DispatchBoardViewModel
 import com.example.rampdispatch.ui.theme.RampDispatchTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,12 +22,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             RampDispatchTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                val viewModel: DispatchBoardViewModel =
+                    viewModel(factory = DispatchBoardViewModel.Factory)
+                DispatchBoardScreen(viewModel = viewModel)
             }
         }
     }
