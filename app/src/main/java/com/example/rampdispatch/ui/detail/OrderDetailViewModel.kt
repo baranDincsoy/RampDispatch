@@ -52,6 +52,13 @@ class OrderDetailViewModel(
         }
     }
 
+    fun unassignFueler() {
+        val current = uiState.value.order ?: return
+        viewModelScope.launch {
+            repository.unassignFueler(orderId, current.status)
+        }
+    }
+
     fun startFueling() {
         val current = uiState.value.order ?: return
         viewModelScope.launch {

@@ -20,10 +20,11 @@ import java.util.Locale
 
 @Composable
 fun OrderCard(
-    order: FuelOrder,
+    item: BoardItem,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val order = item.order
     val overdue = order.isOverdue()
     val (_, stripeColor, _) = statusVisuals(order.status, overdue)
 
@@ -59,6 +60,17 @@ fun OrderCard(
                         fontWeight = FontWeight.Bold
                     )
                     StatusChip(status = order.status, isOverdue = overdue)
+                    Spacer(Modifier.height(Dimens.SpacingXs))
+
+                    // Fueler assignment — the dispatcher's key question: who's on this?
+                    Text(
+                        text = item.fuelerName?.let { "👤 $it" } ?: "Unassigned",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (item.fuelerName != null)
+                            MaterialTheme.colorScheme.onSurface
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
 
                 Spacer(Modifier.height(Dimens.SpacingS))

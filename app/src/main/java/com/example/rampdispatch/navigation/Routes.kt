@@ -7,6 +7,8 @@ package com.example.rampdispatch.navigation
  */
 object Routes {
     const val BOARD = "board"
+
+    const val STATS = "stats"
     const val ORDER_DETAIL = "order_detail/{orderId}"
 
     fun orderDetail(orderId: String) = "order_detail/$orderId"

@@ -12,7 +12,7 @@ import com.example.rampdispatch.domain.model.StatusEvent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.Instant
-
+import com.example.rampdispatch.data.local.dao.FuelerWorkload
 /**
  * Single source of truth: the UI always observes Room.
  * The remote API only feeds Room; it never reaches the UI directly.
@@ -23,6 +23,11 @@ class DispatchRepository(
     private val fuelerDao: FuelerDao,
     private val eventDao: StatusEventDao
 ) {
+
+    fun observeCompletedCount(): Flow<Int> = orderDao.observeCompletedCount()
+    fun observeActiveCount(): Flow<Int> = orderDao.observeActiveCount()
+    fun observeTotalFueledLbs(): Flow<Long> = orderDao.observeTotalFueledLbs()
+    fun observeFuelerWorkloads(): Flow<List<FuelerWorkload>> = orderDao.observeFuelerWorkloads()
 
     fun observeActiveOrders(): Flow<List<FuelOrder>> =
         orderDao.observeActiveOrders().map { list -> list.map { it.toDomain() } }
@@ -72,6 +77,11 @@ class DispatchRepository(
     suspend fun assignFueler(orderId: String, fuelerId: String, currentStatus: OrderStatus) {
         orderDao.assignFueler(orderId, fuelerId)
         logEvent(orderId, currentStatus, OrderStatus.ASSIGNED)
+    }
+
+    suspend fun unassignFueler(orderId: String, currentStatus: OrderStatus) {
+        orderDao.unassignFueler(orderId)
+        logEvent(orderId, currentStatus, OrderStatus.PENDING)
     }
 
     suspend fun startFueling(orderId: String, currentStatus: OrderStatus) {

@@ -71,6 +71,7 @@ fun OrderDetailScreen(
                         fuelers = uiState.fuelers,
                         onAssign = viewModel::assignFueler,
                         onStart = viewModel::startFueling,
+                        onUnassign = viewModel::unassignFueler,
                         onComplete = viewModel::completeOrder
                     )
                 }
@@ -139,6 +140,7 @@ private fun ActionSection(
     fuelers: List<Fueler>,
     onAssign: (String) -> Unit,
     onStart: () -> Unit,
+    onUnassign: () -> Unit,
     onComplete: (Int) -> Unit
 ) {
     when (order.status) {
@@ -162,10 +164,39 @@ private fun ActionSection(
             }
         }
 
-        OrderStatus.ASSIGNED -> Button(
-            onClick = onStart,
-            modifier = Modifier.fillMaxWidth().height(Dimens.MinTouchTarget)
-        ) { Text("Start fueling") }
+        OrderStatus.ASSIGNED -> {
+            var showReassign by remember { mutableStateOf(false) }
+
+            Column(verticalArrangement = Arrangement.spacedBy(Dimens.SpacingM)) {
+                Button(
+                    onClick = onStart,
+                    modifier = Modifier.fillMaxWidth().height(Dimens.MinTouchTarget)
+                ) { Text("Start fueling") }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(Dimens.SpacingM)) {
+                    OutlinedButton(
+                        onClick = { showReassign = true },
+                        modifier = Modifier.weight(1f).height(Dimens.MinTouchTarget)
+                    ) { Text("Reassign") }
+
+                    OutlinedButton(
+                        onClick = onUnassign,
+                        modifier = Modifier.weight(1f).height(Dimens.MinTouchTarget)
+                    ) { Text("Unassign") }
+                }
+            }
+
+            if (showReassign) {
+                FuelerPickerDialog(
+                    fuelers = fuelers,
+                    onPick = { fuelerId ->
+                        showReassign = false
+                        onAssign(fuelerId)
+                    },
+                    onDismiss = { showReassign = false }
+                )
+            }
+        }
 
         OrderStatus.IN_PROGRESS -> {
             var quantityText by remember { mutableStateOf("") }

@@ -16,13 +16,24 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+
+/** How the board is ordered. */
+enum class BoardSort(val label: String) {
+    ETD("ETD"),
+    GATE("Gate"),
+    FUELER("Fueler")
+}
+
 /** Filter chips shown on top of the board. */
 enum class BoardFilter { ALL, PENDING, ASSIGNED, IN_PROGRESS, OVERDUE }
 
 /** One immutable snapshot of everything the board screen needs to draw. */
 data class BoardUiState(
-    val orders: List<FuelOrder> = emptyList(),
+    val items: List<BoardItem> = emptyList(),
     val selectedFilter: BoardFilter = BoardFilter.ALL,
+    val selectedSort: BoardSort = BoardSort.ETD,
+    val selectedConcourse: String? = null,        // null = All concourses
+    val availableConcourses: List<String> = emptyList(),
     val isRefreshing: Boolean = false,
     val errorMessage: String? = null
 )
@@ -32,9 +43,11 @@ class DispatchBoardViewModel(
 ) : ViewModel() {
 
     // Private, mutable inputs — only the ViewModel can change these.
+    private val selectedSort = MutableStateFlow(BoardSort.ETD)
     private val selectedFilter = MutableStateFlow(BoardFilter.ALL)
     private val isRefreshing = MutableStateFlow(false)
     private val errorMessage = MutableStateFlow<String?>(null)
+    private val selectedConcourse = MutableStateFlow<String?>(null)
 
     /**
      * Public, read-only output. combine() re-computes the UiState whenever
@@ -42,13 +55,29 @@ class DispatchBoardViewModel(
      */
     val uiState: StateFlow<BoardUiState> = combine(
         repository.observeActiveOrders(),
+        repository.observeFuelers(),
         selectedFilter,
-        isRefreshing,
-        errorMessage
-    ) { orders, filter, refreshing, error ->
+        selectedSort,
+        combine(selectedConcourse, isRefreshing, errorMessage) { c, r, e -> Triple(c, r, e) }
+    ) { orders, fuelers, filter, sort, (concourse, refreshing, error) ->
+
+        val nameById = fuelers.associateBy({ it.id }, { it.name })
+
+        // Concourse chips are derived from the data, sorted alphabetically.
+        val concourses = orders.map { it.terminal }.distinct().sorted()
+
+        val items = orders
+            .applyFilter(filter)
+            .filter { concourse == null || it.terminal == concourse }   // concourse filter
+            .map { order -> BoardItem(order, order.fuelerId?.let { nameById[it] }) }
+            .applySort(sort)
+
         BoardUiState(
-            orders = orders.applyFilter(filter),
+            items = items,
             selectedFilter = filter,
+            selectedSort = sort,
+            selectedConcourse = concourse,
+            availableConcourses = concourses,
             isRefreshing = refreshing,
             errorMessage = error
         )
@@ -61,7 +90,12 @@ class DispatchBoardViewModel(
     init {
         refresh()   // pull fresh data once when the screen first opens
     }
-
+    fun onSortSelected(sort: BoardSort) {
+        selectedSort.value = sort
+    }
+    fun onConcourseSelected(concourse: String?) {
+        selectedConcourse.value = concourse
+    }
     fun refresh() {
         viewModelScope.launch {
             isRefreshing.value = true
@@ -101,3 +135,18 @@ class DispatchBoardViewModel(
         }
     }
 }
+
+private fun List<BoardItem>.applySort(sort: BoardSort): List<BoardItem> =
+    when (sort) {
+        BoardSort.ETD ->
+            sortedBy { it.order.etd }
+
+        BoardSort.GATE ->
+            sortedWith(compareBy({ it.order.terminal }, { it.order.gate }))
+
+        BoardSort.FUELER ->
+            sortedWith(
+                compareBy<BoardItem, String?>(nullsLast()) { it.fuelerName }
+                    .thenBy { it.order.etd }
+            )
+    }

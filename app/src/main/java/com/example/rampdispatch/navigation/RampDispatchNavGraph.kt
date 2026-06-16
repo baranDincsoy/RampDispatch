@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import com.example.rampdispatch.ui.board.DispatchBoardScreen
 import com.example.rampdispatch.ui.board.DispatchBoardViewModel
 import com.example.rampdispatch.ui.detail.OrderDetailScreen
+import com.example.rampdispatch.ui.stats.StatsScreen
 
 @Composable
 fun RampDispatchNavGraph(navController: NavHostController) {
@@ -26,6 +27,10 @@ fun RampDispatchNavGraph(navController: NavHostController) {
                     navController.navigate(Routes.orderDetail(orderId))
                 }
             )
+        }
+
+        composable(route = Routes.STATS) {
+            StatsScreen()
         }
 
         composable(route = Routes.ORDER_DETAIL) { backStackEntry ->
