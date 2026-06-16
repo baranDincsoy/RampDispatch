@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
@@ -16,7 +18,8 @@ import com.example.rampdispatch.ui.theme.Dimens
 @Composable
 fun DispatchBoardScreen(
     viewModel: DispatchBoardViewModel,
-    onOrderClick: (String) -> Unit = {}
+    onOrderClick: (String) -> Unit = {},
+    onLogout: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -30,7 +33,16 @@ fun DispatchBoardScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Dispatch Board") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Dispatch Board") },
+                actions = {
+                    IconButton(onClick = onLogout) {
+                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Log out")
+                    }
+                }
+            )
+        },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Column(Modifier.padding(innerPadding)) {

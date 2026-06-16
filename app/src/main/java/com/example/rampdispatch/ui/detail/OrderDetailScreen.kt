@@ -69,6 +69,7 @@ fun OrderDetailScreen(
                     ActionSection(
                         order = order,
                         fuelers = uiState.fuelers,
+                        canManage = uiState.canManageAssignment,
                         onAssign = viewModel::assignFueler,
                         onStart = viewModel::startFueling,
                         onUnassign = viewModel::unassignFueler,
@@ -138,6 +139,7 @@ private fun DetailLine(label: String, value: String) {
 private fun ActionSection(
     order: FuelOrder,
     fuelers: List<Fueler>,
+    canManage: Boolean,
     onAssign: (String) -> Unit,
     onStart: () -> Unit,
     onUnassign: () -> Unit,
@@ -146,20 +148,28 @@ private fun ActionSection(
     when (order.status) {
 
         OrderStatus.PENDING -> {
-            var showPicker by remember { mutableStateOf(false) }
-            Button(
-                onClick = { showPicker = true },
-                modifier = Modifier.fillMaxWidth().height(Dimens.MinTouchTarget)
-            ) { Text("Assign fueler") }
+            if (canManage) {
+                var showPicker by remember { mutableStateOf(false) }
+                Button(
+                    onClick = { showPicker = true },
+                    modifier = Modifier.fillMaxWidth().height(Dimens.MinTouchTarget)
+                ) { Text("Assign fueler") }
 
-            if (showPicker) {
-                FuelerPickerDialog(
-                    fuelers = fuelers,
-                    onPick = { fuelerId ->
-                        showPicker = false
-                        onAssign(fuelerId)
-                    },
-                    onDismiss = { showPicker = false }
+                if (showPicker) {
+                    FuelerPickerDialog(
+                        fuelers = fuelers,
+                        onPick = { fuelerId ->
+                            showPicker = false
+                            onAssign(fuelerId)
+                        },
+                        onDismiss = { showPicker = false }
+                    )
+                }
+            } else {
+                Text(
+                    "Waiting for assignment.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -173,16 +183,18 @@ private fun ActionSection(
                     modifier = Modifier.fillMaxWidth().height(Dimens.MinTouchTarget)
                 ) { Text("Start fueling") }
 
-                Row(horizontalArrangement = Arrangement.spacedBy(Dimens.SpacingM)) {
-                    OutlinedButton(
-                        onClick = { showReassign = true },
-                        modifier = Modifier.weight(1f).height(Dimens.MinTouchTarget)
-                    ) { Text("Reassign") }
+                if (canManage) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(Dimens.SpacingM)) {
+                        OutlinedButton(
+                            onClick = { showReassign = true },
+                            modifier = Modifier.weight(1f).height(Dimens.MinTouchTarget)
+                        ) { Text("Reassign") }
 
-                    OutlinedButton(
-                        onClick = onUnassign,
-                        modifier = Modifier.weight(1f).height(Dimens.MinTouchTarget)
-                    ) { Text("Unassign") }
+                        OutlinedButton(
+                            onClick = onUnassign,
+                            modifier = Modifier.weight(1f).height(Dimens.MinTouchTarget)
+                        ) { Text("Unassign") }
+                    }
                 }
             }
 

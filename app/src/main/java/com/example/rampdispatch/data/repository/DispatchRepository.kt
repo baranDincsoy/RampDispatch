@@ -32,6 +32,10 @@ class DispatchRepository(
     fun observeActiveOrders(): Flow<List<FuelOrder>> =
         orderDao.observeActiveOrders().map { list -> list.map { it.toDomain() } }
 
+    fun observeActiveOrdersForFueler(fuelerId: String): Flow<List<FuelOrder>> =
+        orderDao.observeActiveOrdersForFueler(fuelerId)
+            .map { list -> list.map { it.toDomain() } }
+
     fun observeOrder(orderId: String): Flow<FuelOrder?> =
         orderDao.observeOrder(orderId).map { it?.toDomain() }
 

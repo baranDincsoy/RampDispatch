@@ -7,14 +7,18 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.rampdispatch.RampDispatchApplication
 import com.example.rampdispatch.data.repository.DispatchRepository
+import com.example.rampdispatch.data.session.SessionManager
 import com.example.rampdispatch.domain.model.FuelOrder
 import com.example.rampdispatch.domain.model.OrderStatus
+import com.example.rampdispatch.domain.model.UserRole
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
 
 
 /** How the board is ordered. */
@@ -28,6 +32,9 @@ enum class BoardSort(val label: String) {
 enum class BoardFilter { ALL, PENDING, ASSIGNED, IN_PROGRESS, OVERDUE }
 
 /** One immutable snapshot of everything the board screen needs to draw. */
+
+// Team leader sees all orders; a fueler sees only their own.
+
 data class BoardUiState(
     val items: List<BoardItem> = emptyList(),
     val selectedFilter: BoardFilter = BoardFilter.ALL,
@@ -39,7 +46,8 @@ data class BoardUiState(
 )
 
 class DispatchBoardViewModel(
-    private val repository: DispatchRepository
+    private val repository: DispatchRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     // Private, mutable inputs — only the ViewModel can change these.
@@ -49,12 +57,21 @@ class DispatchBoardViewModel(
     private val errorMessage = MutableStateFlow<String?>(null)
     private val selectedConcourse = MutableStateFlow<String?>(null)
 
+
+    private val ordersSource: Flow<List<FuelOrder>> = run {
+        val user = sessionManager.currentUser.value
+        if (user?.role == UserRole.FUELER && user.fuelerId != null) {
+            repository.observeActiveOrdersForFueler(user.fuelerId)
+        } else {
+            repository.observeActiveOrders()
+        }
+    }
     /**
      * Public, read-only output. combine() re-computes the UiState whenever
      * ANY of its inputs emits: a Room change, a filter tap, a refresh flag.
      */
     val uiState: StateFlow<BoardUiState> = combine(
-        repository.observeActiveOrders(),
+        ordersSource,                          // was: repository.observeActiveOrders()
         repository.observeFuelers(),
         selectedFilter,
         selectedSort,
@@ -125,12 +142,11 @@ class DispatchBoardViewModel(
         }
 
     companion object {
-        /** Tells Android how to build this ViewModel with its dependency. */
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
                         as RampDispatchApplication
-                DispatchBoardViewModel(app.repository)
+                DispatchBoardViewModel(app.repository, app.sessionManager)
             }
         }
     }

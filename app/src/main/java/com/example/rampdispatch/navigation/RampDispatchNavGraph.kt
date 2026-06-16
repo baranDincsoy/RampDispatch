@@ -11,13 +11,14 @@ import com.example.rampdispatch.ui.detail.OrderDetailScreen
 import com.example.rampdispatch.ui.stats.StatsScreen
 
 @Composable
-fun RampDispatchNavGraph(navController: NavHostController) {
-
+fun RampDispatchNavGraph(
+    navController: NavHostController,
+    onLogout: () -> Unit = {}
+) {
     NavHost(
         navController = navController,
         startDestination = Routes.BOARD
     ) {
-
         composable(route = Routes.BOARD) {
             val viewModel: DispatchBoardViewModel =
                 viewModel(factory = DispatchBoardViewModel.Factory)
@@ -25,7 +26,8 @@ fun RampDispatchNavGraph(navController: NavHostController) {
                 viewModel = viewModel,
                 onOrderClick = { orderId ->
                     navController.navigate(Routes.orderDetail(orderId))
-                }
+                },
+                onLogout = onLogout
             )
         }
 

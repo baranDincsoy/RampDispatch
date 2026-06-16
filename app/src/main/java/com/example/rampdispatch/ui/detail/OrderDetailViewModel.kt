@@ -7,9 +7,11 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.rampdispatch.RampDispatchApplication
 import com.example.rampdispatch.data.repository.DispatchRepository
+import com.example.rampdispatch.data.session.SessionManager
 import com.example.rampdispatch.domain.model.FuelOrder
 import com.example.rampdispatch.domain.model.Fueler
 import com.example.rampdispatch.domain.model.StatusEvent
+import com.example.rampdispatch.domain.model.UserRole
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -17,14 +19,16 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class OrderDetailUiState(
-    val order: FuelOrder? = null,        // null while loading or if id is unknown
+    val order: FuelOrder? = null,
     val fuelers: List<Fueler> = emptyList(),
     val events: List<StatusEvent> = emptyList(),
+    val canManageAssignment: Boolean = false,   // true only for team leader
     val isLoading: Boolean = true
 )
 
 class OrderDetailViewModel(
     private val repository: DispatchRepository,
+    private val sessionManager: SessionManager,
     private val orderId: String
 ) : ViewModel() {
 
@@ -37,6 +41,8 @@ class OrderDetailViewModel(
             order = order,
             fuelers = fuelers,
             events = events,
+            canManageAssignment =
+                sessionManager.currentUser.value?.role == UserRole.TEAM_LEADER,
             isLoading = false
         )
     }.stateIn(
@@ -82,7 +88,7 @@ class OrderDetailViewModel(
             initializer {
                 val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
                         as RampDispatchApplication
-                OrderDetailViewModel(app.repository, orderId)
+                OrderDetailViewModel(app.repository, app.sessionManager, orderId)
             }
         }
     }

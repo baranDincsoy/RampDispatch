@@ -19,7 +19,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -27,6 +29,7 @@ import com.example.rampdispatch.navigation.RampDispatchNavGraph
 import com.example.rampdispatch.navigation.Routes
 import com.example.rampdispatch.ui.board.DispatchBoardScreen
 import com.example.rampdispatch.ui.board.DispatchBoardViewModel
+import com.example.rampdispatch.ui.login.LoginScreen
 import com.example.rampdispatch.ui.theme.RampDispatchTheme
 
 class MainActivity : ComponentActivity() {
@@ -35,7 +38,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             RampDispatchTheme {
-                MainScaffold()
+                val app = applicationContext as RampDispatchApplication
+                val currentUser by app.sessionManager.currentUser.collectAsStateWithLifecycle()
+
+                if (currentUser == null) {
+                    LoginScreen()
+                } else {
+                    MainScaffold()
+                }
             }
         }
     }
@@ -59,6 +69,8 @@ fun GreetingPreview() {
 
 @Composable
 private fun MainScaffold() {
+    val context = LocalContext.current
+    val app = context.applicationContext as RampDispatchApplication
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -91,6 +103,7 @@ private fun MainScaffold() {
                         },
                         icon = { Icon(Icons.Default.Assessment, contentDescription = null) },
                         label = { Text("Stats") }
+
                     )
                 }
             }
@@ -98,6 +111,12 @@ private fun MainScaffold() {
     ) { innerPadding ->
         Box(Modifier.padding(innerPadding)) {
             RampDispatchNavGraph(navController = navController)
+        }
+        Box(Modifier.padding(innerPadding)) {
+            RampDispatchNavGraph(
+                navController = navController,
+                onLogout = { app.sessionManager.logout() }
+            )
         }
     }
 }

@@ -31,6 +31,10 @@ interface FuelOrderDao {
     @Query("SELECT * FROM fuel_orders WHERE status != 'COMPLETED' ORDER BY etdEpochMillis ASC")
     fun observeActiveOrders(): Flow<List<FuelOrderEntity>>
 
+    /** A fueler sees only their own active work. */
+    @Query("SELECT * FROM fuel_orders WHERE status != 'COMPLETED' AND fuelerId = :fuelerId ORDER BY etdEpochMillis ASC")
+    fun observeActiveOrdersForFueler(fuelerId: String): Flow<List<FuelOrderEntity>>
+
     @Query("SELECT * FROM fuel_orders WHERE id = :orderId")
     fun observeOrder(orderId: String): Flow<FuelOrderEntity?>
 
