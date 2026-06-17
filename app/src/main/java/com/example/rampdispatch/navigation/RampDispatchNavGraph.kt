@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import com.example.rampdispatch.ui.board.DispatchBoardScreen
 import com.example.rampdispatch.ui.board.DispatchBoardViewModel
 import com.example.rampdispatch.ui.detail.OrderDetailScreen
+import com.example.rampdispatch.ui.fueling.FuelingWizardScreen
 import com.example.rampdispatch.ui.stats.StatsScreen
 
 @Composable
@@ -39,7 +40,21 @@ fun RampDispatchNavGraph(
             val orderId = backStackEntry.arguments?.getString("orderId").orEmpty()
             OrderDetailScreen(
                 orderId = orderId,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onStartFueling = {
+                    navController.navigate(Routes.fuelingWizard(orderId))
+                }
+            )
+        }
+        composable(route = Routes.FUELING_WIZARD) { backStackEntry ->
+            val orderId = backStackEntry.arguments?.getString("orderId").orEmpty()
+            FuelingWizardScreen(
+                orderId = orderId,
+                onFinished = {
+                    // Order completed — go straight back to the board, skipping detail.
+                    navController.popBackStack(Routes.BOARD, inclusive = false)
+                },
+                onCancel = { navController.popBackStack() }
             )
         }
     }

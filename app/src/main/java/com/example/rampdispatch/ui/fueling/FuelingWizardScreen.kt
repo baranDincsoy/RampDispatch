@@ -122,6 +122,13 @@ private fun StepTitle(title: String, hint: String? = null) {
 private fun TailVerifyStep(state: FuelingUiState, order: FuelOrder, vm: FuelingWizardViewModel) {
     Column(verticalArrangement = Arrangement.spacedBy(Dimens.SpacingM)) {
         StepTitle("Verify aircraft", "Enter the tail number on the aircraft to confirm you're at the right one.")
+
+        // Context so the fueler knows which order this is — without revealing
+        // the exact tail (they must read it off the aircraft).
+        InfoLine("Flight", order.flightNumber)
+        InfoLine("Gate", "${order.terminal}${order.gate}")
+        InfoLine("Destination", order.destination)
+
         OutlinedTextField(
             value = state.data.enteredTail,
             onValueChange = vm::onTailChanged,

@@ -29,6 +29,7 @@ import java.util.Locale
 fun OrderDetailScreen(
     orderId: String,
     onBack: () -> Unit,
+    onStartFueling: () -> Unit,
     viewModel: OrderDetailViewModel =
         viewModel(factory = OrderDetailViewModel.factory(orderId))
 ) {
@@ -71,7 +72,7 @@ fun OrderDetailScreen(
                         fuelers = uiState.fuelers,
                         canManage = uiState.canManageAssignment,
                         onAssign = viewModel::assignFueler,
-                        onStart = viewModel::startFueling,
+                        onStart = onStartFueling,
                         onUnassign = viewModel::unassignFueler,
                         onComplete = viewModel::completeOrder
                     )

@@ -7,9 +7,11 @@ package com.example.rampdispatch.navigation
  */
 object Routes {
     const val BOARD = "board"
-
     const val STATS = "stats"
     const val ORDER_DETAIL = "order_detail/{orderId}"
+    const val FUELING_WIZARD = "fueling_wizard/{orderId}"
+
+    fun fuelingWizard(orderId: String) = "fueling_wizard/$orderId"
 
     fun orderDetail(orderId: String) = "order_detail/$orderId"
 }
