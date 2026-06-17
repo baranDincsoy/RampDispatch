@@ -1,13 +1,37 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "station": "CLT",
   "fuelers": [
-    { "id": "F1", "name": "Marcus Reed", "deviceId": "T-3551" },
-    { "id": "F2", "name": "Dana Whitfield", "deviceId": "T-3518" },
-    { "id": "F3", "name": "Luis Ortega", "deviceId": "T-2483" },
-    { "id": "F4", "name": "Priya Nair", "deviceId": "T-2496" },
-    { "id": "F5", "name": "Jamal Carter", "deviceId": "T-3504" },
-    { "id": "F6", "name": "Tasha Boone", "deviceId": "T-2477" }
+    {
+      "id": "F1",
+      "name": "Marcus Reed",
+      "deviceId": "T-3551"
+    },
+    {
+      "id": "F2",
+      "name": "Dana Whitfield",
+      "deviceId": "T-3518"
+    },
+    {
+      "id": "F3",
+      "name": "Luis Ortega",
+      "deviceId": "T-2483"
+    },
+    {
+      "id": "F4",
+      "name": "Priya Nair",
+      "deviceId": "T-2496"
+    },
+    {
+      "id": "F5",
+      "name": "Jamal Carter",
+      "deviceId": "T-3504"
+    },
+    {
+      "id": "F6",
+      "name": "Tasha Boone",
+      "deviceId": "T-2477"
+    }
   ],
   "orders": [
     {
@@ -23,7 +47,14 @@
       "etaOffsetMin": -35,
       "etdOffsetMin": 30,
       "status": "IN_PROGRESS",
-      "fuelerId": "F1"
+      "fuelerId": "F1",
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT",
+        "ACT1",
+        "ACT2"
+      ]
     },
     {
       "id": "ORD-1002",
@@ -38,7 +69,12 @@
       "etaOffsetMin": -25,
       "etdOffsetMin": 40,
       "status": "IN_PROGRESS",
-      "fuelerId": "F2"
+      "fuelerId": "F2",
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT"
+      ]
     },
     {
       "id": "ORD-1003",
@@ -53,7 +89,12 @@
       "etaOffsetMin": -40,
       "etdOffsetMin": 25,
       "status": "IN_PROGRESS",
-      "fuelerId": "F3"
+      "fuelerId": "F3",
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT"
+      ]
     },
     {
       "id": "ORD-1004",
@@ -68,7 +109,14 @@
       "etaOffsetMin": -30,
       "etdOffsetMin": 35,
       "status": "IN_PROGRESS",
-      "fuelerId": "F4"
+      "fuelerId": "F4",
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT",
+        "ACT1",
+        "ACT2"
+      ]
     },
     {
       "id": "ORD-1005",
@@ -83,7 +131,14 @@
       "etaOffsetMin": 15,
       "etdOffsetMin": 80,
       "status": "ASSIGNED",
-      "fuelerId": "F1"
+      "fuelerId": "F1",
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT",
+        "ACT1",
+        "ACT2"
+      ]
     },
     {
       "id": "ORD-1006",
@@ -98,7 +153,12 @@
       "etaOffsetMin": 25,
       "etdOffsetMin": 90,
       "status": "ASSIGNED",
-      "fuelerId": "F2"
+      "fuelerId": "F2",
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT"
+      ]
     },
     {
       "id": "ORD-1007",
@@ -113,7 +173,14 @@
       "etaOffsetMin": 20,
       "etdOffsetMin": 85,
       "status": "ASSIGNED",
-      "fuelerId": "F3"
+      "fuelerId": "F3",
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT",
+        "ACT1",
+        "ACT2"
+      ]
     },
     {
       "id": "ORD-1008",
@@ -128,7 +195,12 @@
       "etaOffsetMin": 30,
       "etdOffsetMin": 95,
       "status": "ASSIGNED",
-      "fuelerId": "F4"
+      "fuelerId": "F4",
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT"
+      ]
     },
     {
       "id": "ORD-1009",
@@ -143,7 +215,14 @@
       "etaOffsetMin": -5,
       "etdOffsetMin": 60,
       "status": "ASSIGNED",
-      "fuelerId": "F5"
+      "fuelerId": "F5",
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT",
+        "ACT1",
+        "ACT2"
+      ]
     },
     {
       "id": "ORD-1010",
@@ -158,7 +237,12 @@
       "etaOffsetMin": 60,
       "etdOffsetMin": 125,
       "status": "ASSIGNED",
-      "fuelerId": "F5"
+      "fuelerId": "F5",
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT"
+      ]
     },
     {
       "id": "ORD-1011",
@@ -173,7 +257,14 @@
       "etaOffsetMin": -15,
       "etdOffsetMin": 50,
       "status": "ASSIGNED",
-      "fuelerId": "F6"
+      "fuelerId": "F6",
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT",
+        "ACT1",
+        "ACT2"
+      ]
     },
     {
       "id": "ORD-1012",
@@ -188,7 +279,12 @@
       "etaOffsetMin": 45,
       "etdOffsetMin": 110,
       "status": "ASSIGNED",
-      "fuelerId": "F6"
+      "fuelerId": "F6",
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT"
+      ]
     },
     {
       "id": "ORD-1013",
@@ -203,7 +299,14 @@
       "etaOffsetMin": 55,
       "etdOffsetMin": 120,
       "status": "PENDING",
-      "fuelerId": null
+      "fuelerId": null,
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT",
+        "ACT1",
+        "ACT2"
+      ]
     },
     {
       "id": "ORD-1014",
@@ -218,7 +321,12 @@
       "etaOffsetMin": 70,
       "etdOffsetMin": 135,
       "status": "PENDING",
-      "fuelerId": null
+      "fuelerId": null,
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT"
+      ]
     },
     {
       "id": "ORD-1015",
@@ -233,7 +341,12 @@
       "etaOffsetMin": 85,
       "etdOffsetMin": 150,
       "status": "PENDING",
-      "fuelerId": null
+      "fuelerId": null,
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT"
+      ]
     },
     {
       "id": "ORD-1016",
@@ -248,7 +361,14 @@
       "etaOffsetMin": 100,
       "etdOffsetMin": 165,
       "status": "PENDING",
-      "fuelerId": null
+      "fuelerId": null,
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT",
+        "ACT1",
+        "ACT2"
+      ]
     },
     {
       "id": "ORD-1017",
@@ -263,7 +383,12 @@
       "etaOffsetMin": 115,
       "etdOffsetMin": 180,
       "status": "PENDING",
-      "fuelerId": null
+      "fuelerId": null,
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT"
+      ]
     },
     {
       "id": "ORD-1018",
@@ -278,7 +403,14 @@
       "etaOffsetMin": 135,
       "etdOffsetMin": 200,
       "status": "PENDING",
-      "fuelerId": null
+      "fuelerId": null,
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT",
+        "ACT1",
+        "ACT2"
+      ]
     },
     {
       "id": "ORD-1019",
@@ -293,7 +425,12 @@
       "etaOffsetMin": 40,
       "etdOffsetMin": 220,
       "status": "PENDING",
-      "fuelerId": null
+      "fuelerId": null,
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT"
+      ]
     },
     {
       "id": "ORD-1020",
@@ -308,7 +445,14 @@
       "etaOffsetMin": 175,
       "etdOffsetMin": 240,
       "status": "PENDING",
-      "fuelerId": null
+      "fuelerId": null,
+      "tanks": [
+        "LEFT",
+        "CENTER",
+        "RIGHT",
+        "ACT1",
+        "ACT2"
+      ]
     }
   ]
 }
