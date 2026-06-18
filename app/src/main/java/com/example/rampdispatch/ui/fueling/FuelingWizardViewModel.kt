@@ -8,12 +8,14 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.rampdispatch.RampDispatchApplication
 import com.example.rampdispatch.data.repository.DispatchRepository
 import com.example.rampdispatch.domain.model.FuelOrder
+import com.example.rampdispatch.domain.model.FuelTank
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
 
 /** Tolerance band (lbs) for both final reading and totalizer reconciliation. */
 private const val TOLERANCE_LBS = 200
@@ -28,8 +30,7 @@ data class FuelingUiState(
     val neededLbs: Int?
         get() {
             val planned = order?.plannedQuantityLbs ?: return null
-            val arrival = data.arrivalLbs ?: return null
-            return (planned - arrival).coerceAtLeast(0)
+            return (planned - data.arrivalTotalLbs).coerceAtLeast(0)
         }
 
     /** Whether the current step's input is valid enough to advance. */
@@ -40,15 +41,15 @@ data class FuelingUiState(
             FuelingStep.EQUIPMENT ->
                 data.equipmentNumber.isNotBlank()
             FuelingStep.ARRIVAL ->
-                data.arrivalLbs != null
+                order != null && data.arrivalByTank.size == order.tanks.size
             FuelingStep.PUMPING ->
-                true   // pumping is an action, not an input
+                true
             FuelingStep.FINAL_READING ->
-                data.finalLbs != null
+                order != null && data.finalByTank.size == order.tanks.size
             FuelingStep.CAP_CHECK ->
                 data.capConfirmed
             FuelingStep.TOTALIZER ->
-                data.totalizerLbs != null && isTotalizerReconciled
+                data.gallonsPumped != null && data.gallonsPumped!! > 0
             FuelingStep.CLOSEOUT ->
                 data.employeeId.isNotBlank()
         }
@@ -57,17 +58,10 @@ data class FuelingUiState(
     val isFinalWithinTolerance: Boolean
         get() {
             val planned = order?.plannedQuantityLbs ?: return false
-            val finalLbs = data.finalLbs ?: return false
-            return kotlin.math.abs(finalLbs - planned) <= TOLERANCE_LBS
+            return kotlin.math.abs(data.finalTotalLbs - planned) <= TOLERANCE_LBS
         }
 
-    /** Cart totalizer agrees with the panel final reading, within tolerance. */
-    val isTotalizerReconciled: Boolean
-        get() {
-            val finalLbs = data.finalLbs ?: return false
-            val totalizer = data.totalizerLbs ?: return false
-            return kotlin.math.abs(totalizer - finalLbs) <= TOLERANCE_LBS
-        }
+
 }
 
 class FuelingWizardViewModel(
@@ -118,13 +112,32 @@ class FuelingWizardViewModel(
 
     // --- Field updates (UI calls these as the fueler types) ---
 
+// --- Field updates (UI calls these as the fueler types) ---
+
     fun onTailChanged(value: String) { data.value = data.value.copy(enteredTail = value) }
     fun onEquipmentChanged(value: String) { data.value = data.value.copy(equipmentNumber = value) }
-    fun onArrivalChanged(value: Int?) { data.value = data.value.copy(arrivalLbs = value) }
-    fun onFinalChanged(value: Int?) { data.value = data.value.copy(finalLbs = value) }
     fun onCapConfirmedChanged(value: Boolean) { data.value = data.value.copy(capConfirmed = value) }
-    fun onTotalizerChanged(value: Int?) { data.value = data.value.copy(totalizerLbs = value) }
     fun onEmployeeIdChanged(value: String) { data.value = data.value.copy(employeeId = value) }
+
+    fun onArrivalTankChanged(tank: FuelTank, value: Int?) {
+        val map = data.value.arrivalByTank.toMutableMap()
+        if (value == null) map.remove(tank) else map[tank] = value
+        data.value = data.value.copy(arrivalByTank = map)
+    }
+
+    fun onFinalTankChanged(tank: FuelTank, value: Int?) {
+        val map = data.value.finalByTank.toMutableMap()
+        if (value == null) map.remove(tank) else map[tank] = value
+        data.value = data.value.copy(finalByTank = map)
+    }
+
+    fun onTotalizerStartChanged(value: Int?) {
+        data.value = data.value.copy(totalizerStartGal = value)
+    }
+
+    fun onTotalizerEndChanged(value: Int?) {
+        data.value = data.value.copy(totalizerEndGal = value)
+    }
 
     // --- Persistence (only at the boundaries) ---
 
@@ -138,9 +151,9 @@ class FuelingWizardViewModel(
     private fun completeOrder() {
         val current = uiState.value
         val order = current.order ?: return
-        val finalLbs = current.data.finalLbs ?: return
+        val finalTotal = current.data.finalTotalLbs
         viewModelScope.launch {
-            repository.completeOrder(orderId, finalLbs, order.status)
+            repository.completeOrder(orderId, finalTotal, order.status)
             isComplete.value = true
         }
     }

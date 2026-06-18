@@ -14,10 +14,11 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 class LoginViewModel(
     private val sessionManager: SessionManager,
-    repository: DispatchRepository
+    private val repository: DispatchRepository
 ) : ViewModel() {
 
     /** The list of fuelers to offer as login options. */
@@ -28,6 +29,12 @@ class LoginViewModel(
             initialValue = emptyList()
         )
 
+    init {
+        // Pull data on app start so the login list is populated immediately.
+        viewModelScope.launch {
+            repository.refreshFromRemote()
+        }
+    }
     fun loginAsTeamLeader() {
         sessionManager.login(
             CurrentUser(displayName = "Team Leader", role = UserRole.TEAM_LEADER)

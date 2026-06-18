@@ -13,7 +13,7 @@ import com.example.rampdispatch.data.local.entity.StatusEventEntity
 
 @Database(
     entities = [FuelOrderEntity::class, FuelerEntity::class, StatusEventEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class RampDispatchDatabase : RoomDatabase() {
@@ -32,7 +32,10 @@ abstract class RampDispatchDatabase : RoomDatabase() {
                     context.applicationContext,
                     RampDispatchDatabase::class.java,
                     "ramp_dispatch.db"
-                ).build().also { instance = it }
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
+                    .also { instance = it }
             }
     }
 }

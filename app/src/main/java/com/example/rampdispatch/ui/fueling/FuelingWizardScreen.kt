@@ -16,6 +16,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.rampdispatch.domain.model.FuelOrder
 import com.example.rampdispatch.ui.theme.Dimens
 import java.util.Locale
+import com.example.rampdispatch.domain.model.FuelTank
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -161,12 +162,17 @@ private fun EquipmentStep(state: FuelingUiState, vm: FuelingWizardViewModel) {
 @Composable
 private fun ArrivalStep(state: FuelingUiState, order: FuelOrder, vm: FuelingWizardViewModel) {
     Column(verticalArrangement = Arrangement.spacedBy(Dimens.SpacingM)) {
-        StepTitle("Arrival fuel", "How much fuel is already on board?")
-        LbsField(
-            value = state.data.arrivalLbs,
-            label = "Arrival fuel (lbs)",
-            onChange = vm::onArrivalChanged
-        )
+        StepTitle("Arrival fuel", "Enter the fuel already on board, per tank.")
+
+        order.tanks.forEach { tank ->
+            TankField(
+                tank = tank,
+                value = state.data.arrivalByTank[tank],
+                onChange = { vm.onArrivalTankChanged(tank, it) }
+            )
+        }
+
+        InfoLine("Arrival total", String.format(Locale.US, "%,d lbs", state.data.arrivalTotalLbs))
         InfoLine("Planned total", String.format(Locale.US, "%,d lbs", order.plannedQuantityLbs))
         state.neededLbs?.let {
             InfoLine("Need to add", String.format(Locale.US, "%,d lbs", it), highlight = true)
@@ -190,15 +196,20 @@ private fun PumpingStep(state: FuelingUiState, order: FuelOrder) {
 @Composable
 private fun FinalReadingStep(state: FuelingUiState, order: FuelOrder, vm: FuelingWizardViewModel) {
     Column(verticalArrangement = Arrangement.spacedBy(Dimens.SpacingM)) {
-        StepTitle("Final reading", "Enter the total fuel from the panel after fueling.")
-        LbsField(
-            value = state.data.finalLbs,
-            label = "Final fuel (lbs)",
-            onChange = vm::onFinalChanged
-        )
+        StepTitle("Final reading", "Enter the fuel in each tank after fueling.")
+
+        order.tanks.forEach { tank ->
+            TankField(
+                tank = tank,
+                value = state.data.finalByTank[tank],
+                onChange = { vm.onFinalTankChanged(tank, it) }
+            )
+        }
+
+        InfoLine("Final total", String.format(Locale.US, "%,d lbs", state.data.finalTotalLbs))
         InfoLine("Planned total", String.format(Locale.US, "%,d lbs", order.plannedQuantityLbs))
-        if (state.data.finalLbs != null && !state.isFinalWithinTolerance) {
-            Text("Outside ±200 lbs tolerance — re-check the panel.",
+        if (state.data.finalByTank.isNotEmpty() && !state.isFinalWithinTolerance) {
+            Text("Total is outside ±200 lbs of planned — re-check.",
                 color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
     }
@@ -218,18 +229,28 @@ private fun CapCheckStep(state: FuelingUiState, vm: FuelingWizardViewModel) {
 @Composable
 private fun TotalizerStep(state: FuelingUiState, vm: FuelingWizardViewModel) {
     Column(verticalArrangement = Arrangement.spacedBy(Dimens.SpacingM)) {
-        StepTitle("Totalizer", "Enter the cart totalizer reading. It must match the final reading within ±200 lbs.")
+        StepTitle("Totalizer", "Enter the cart's gallon counter before and after fueling.")
+
         LbsField(
-            value = state.data.totalizerLbs,
-            label = "Totalizer (lbs)",
-            onChange = vm::onTotalizerChanged
+            value = state.data.totalizerStartGal,
+            label = "Totalizer start (gal)",
+            onChange = vm::onTotalizerStartChanged
         )
-        state.data.finalLbs?.let {
-            InfoLine("Final reading", String.format(Locale.US, "%,d lbs", it))
-        }
-        if (state.data.totalizerLbs != null && !state.isTotalizerReconciled) {
-            Text("Doesn't reconcile with final reading.", color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall)
+        LbsField(
+            value = state.data.totalizerEndGal,
+            label = "Totalizer end (gal)",
+            onChange = vm::onTotalizerEndChanged
+        )
+        state.data.gallonsPumped?.let { pumped ->
+            InfoLine(
+                "Gallons pumped",
+                String.format(Locale.US, "%,d gal", pumped),
+                highlight = true
+            )
+            if (pumped <= 0) {
+                Text("End must be greater than start.",
+                    color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            }
         }
     }
 }
@@ -249,7 +270,17 @@ private fun CloseoutStep(state: FuelingUiState, vm: FuelingWizardViewModel) {
     }
 }
 
-/* ---------- Small reusable pieces ---------- */
+@Composable
+private fun TankField(tank: FuelTank, value: Int?, onChange: (Int?) -> Unit) {
+    OutlinedTextField(
+        value = value?.toString() ?: "",
+        onValueChange = { text -> onChange(text.filter(Char::isDigit).toIntOrNull()) },
+        label = { Text("${tank.label} (lbs)") },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth()
+    )
+}
 
 @Composable
 private fun LbsField(value: Int?, label: String, onChange: (Int?) -> Unit) {
