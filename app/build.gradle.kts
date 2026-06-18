@@ -7,13 +7,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.rampdispatch"
+    namespace = "com.barandincsoy.rampdispatch"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.example.rampdispatch"
+        applicationId = "com.barandincsoy.rampdispatch"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
