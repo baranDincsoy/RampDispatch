@@ -11,6 +11,7 @@ import com.example.rampdispatch.domain.model.OrderStatus
 import com.example.rampdispatch.domain.model.StatusEvent
 import java.time.Duration
 import java.time.Instant
+import com.example.rampdispatch.domain.model.FuelTank
 
 /**
  * Mapping happens at layer boundaries:
@@ -33,7 +34,8 @@ fun FuelOrderDto.toEntity(syncTime: Instant): FuelOrderEntity =
         etaEpochMillis = syncTime.plus(Duration.ofMinutes(etaOffsetMin)).toEpochMilli(),
         etdEpochMillis = syncTime.plus(Duration.ofMinutes(etdOffsetMin)).toEpochMilli(),
         status = status.toOrderStatus(),
-        fuelerId = fuelerId
+        fuelerId = fuelerId,
+        tanksCsv = tanks.joinToString(",")
     )
 
 fun FuelerDto.toEntity(): FuelerEntity =
@@ -54,7 +56,8 @@ fun FuelOrderEntity.toDomain(): FuelOrder =
         eta = Instant.ofEpochMilli(etaEpochMillis),
         etd = Instant.ofEpochMilli(etdEpochMillis),
         status = status,
-        fuelerId = fuelerId
+        fuelerId = fuelerId,
+        tanks = tanksCsv.toFuelTanks()
     )
 
 fun FuelerEntity.toDomain(): Fueler =
@@ -71,3 +74,10 @@ fun StatusEventEntity.toDomain(): StatusEvent =
 /** Unknown statuses from the API degrade gracefully instead of crashing. */
 private fun String.toOrderStatus(): OrderStatus =
     OrderStatus.entries.firstOrNull { it.name == this } ?: OrderStatus.PENDING
+
+/** "LEFT,CENTER,RIGHT" -> [LEFT, CENTER, RIGHT]; unknown names are skipped. */
+private fun String.toFuelTanks(): List<FuelTank> =
+    if (isBlank()) emptyList()
+    else split(",").mapNotNull { name ->
+        FuelTank.entries.firstOrNull { it.name == name.trim() }
+    }

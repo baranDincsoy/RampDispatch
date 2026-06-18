@@ -18,6 +18,7 @@ data class FuelOrder(
     val etd: Instant,
     val status: OrderStatus,
     val fuelerId: String?          // null while PENDING
+
 ) {
 
     /** An order is overdue when its departure time has passed but it is not completed. */

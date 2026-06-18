@@ -19,5 +19,6 @@ data class FuelOrderEntity(
     val etaEpochMillis: Long,
     val etdEpochMillis: Long,
     val status: OrderStatus,
-    val fuelerId: String?
+    val fuelerId: String?,
+    val tanksCsv: String   // tanks stored as "LEFT,CENTER,RIGHT" — Room can't store a List directly
 )

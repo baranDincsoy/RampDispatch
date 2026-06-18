@@ -36,5 +36,6 @@ data class FuelOrderDto(
     val etaOffsetMin: Long,
     val etdOffsetMin: Long,
     val status: String,   // raw string; mapped to OrderStatus enum at the boundary
-    val fuelerId: String?
+    val fuelerId: String?,
+    val tanks: List<String> = emptyList()
 )
